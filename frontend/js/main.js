@@ -19,12 +19,12 @@ function displayProducts() {
 
                     <h3>${product.name}</h3>
 
-                    <p>${product.description}</p>
+                    <p>${product.description ?? ""}</p>
 
                     <div class="product-bottom">
 
                         <span class="product-price">
-                            ${product.price.toLocaleString("en-US")} EGP
+                            ${Number(product.price).toLocaleString("en-US")} EGP
                         </span>
 
                         <button
@@ -46,5 +46,3 @@ function displayProducts() {
     });
 
 }
-
-displayProducts();

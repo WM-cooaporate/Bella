@@ -14,10 +14,9 @@ const invoiceTotal = document.getElementById("invoice-total");
 
 // Select Product
 function selectProduct(productId) {
-
-    selectedProduct = products.find((product) => {
-        return product.id === productId;
-    });
+selectedProduct = products.find((product) => {
+    return Number(product.id) === Number(productId);
+});
 
     if (!selectedProduct) return;
 
@@ -93,8 +92,7 @@ function validateOrder() {
 
     return true;
 }
-
-function sendOrder() {
+async function sendOrder() {
 
     if (!validateOrder()) {
         return;
@@ -106,17 +104,49 @@ function sendOrder() {
 
     const quantity = Number(quantityInput.value);
 
-    const total = selectedProduct.price * quantity;
+    const ownerPhone = "201208886589";
 
-    const ownerPhone = "+201208886589";
+    // Prepare order data
+    const orderData = {
+        customer_name: name,
+        phone: phone,
+        address: address,
+        product_id: Number(selectedProduct.id),
+        quantity: quantity
+    };
 
- const productImage = new URL(
-    selectedProduct.image,
-    window.location.href
-).href;
+    try {
 
-const message = `
-New Order - Product Store
+        // Send order to PHP Backend
+        const response = await fetch(
+            "http://localhost/bella/backend/public/index.php",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(orderData)
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(
+                result.message || "Unable to create order"
+            );
+        }
+
+        // Get server response
+        const order = result.data;
+
+        // Prepare WhatsApp message
+        const message = `
+New Order - Bella Store
+
+Order Number: ${order.order_number}
 
 Customer Information:
 Name: ${name}
@@ -125,17 +155,29 @@ Address: ${address}
 
 Order Details:
 Product: ${selectedProduct.name}
-Unit Price: ${selectedProduct.price} EGP
+Unit Price: ${Number(selectedProduct.price)} EGP
 Quantity: ${quantity}
 
-Total: ${total.toLocaleString("en-US")} EGP
-
-Product Image:
-${productImage}
+Total: ${Number(order.total_amount).toLocaleString("en-US")} EGP
 `;
-    const whatsappURL =
-        `https://wa.me/${ownerPhone}?text=${encodeURIComponent(message)}`;
 
-    window.open(whatsappURL, "_blank");
+        const whatsappURL =
+            `https://wa.me/${ownerPhone}?text=${encodeURIComponent(message)}`;
 
+        // Open WhatsApp after successful order creation
+        window.open(whatsappURL, "_blank");
+
+        alert(
+            `Order created successfully!\nOrder Number: ${order.order_number}`
+        );
+
+    } catch (error) {
+
+        console.error("Order Error:", error);
+
+        alert(
+            error.message || "Something went wrong. Please try again."
+        );
+
+    }
 }

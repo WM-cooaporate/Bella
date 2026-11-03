@@ -1,24 +1,36 @@
 
-const products = [
-    {
-        id: 1,
-        name: "Premium Watch",
-        description: "Elegant design for everyday use.",
-        price: 1200,
-        image: "assets/images/p1.jpg"
-    },
-    {
-        id: 2,
-        name: "Classic Bag",
-        description: "A stylish bag with excellent quality.",
-        price: 850,
-        image: "assets/images/p2.jpg"
-    },
-    {
-        id: 3,
-        name: "Modern Shoes",
-        description: "Comfortable shoes with modern style.",
-        price: 1500,
-        image: "assets/images/p3.jpg"
+let products = [];
+
+async function loadProducts() {
+    try {
+        const response = await fetch(
+            "http://localhost/bella/backend/public/index.php"
+        );
+
+        console.log("Response Status:", response.status);
+
+        const responseText = await response.text();
+
+        console.log("Raw Response:", responseText);
+
+        const result = JSON.parse(responseText);
+
+        console.log("Parsed Data:", result);
+
+        if (!result.success) {
+            throw new Error("API returned unsuccessful response");
+        }
+
+        products = result.data;
+
+        displayProducts();
+
+    } catch (error) {
+        console.error("Products Error:", error);
+
+        document.getElementById("products-container").innerHTML =
+            "<p>Unable to load products.</p>";
     }
-];
+}
+
+loadProducts();
