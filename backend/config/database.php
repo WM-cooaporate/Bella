@@ -3,12 +3,13 @@
 declare(strict_types=1);
 
 // Database configuration
-$host = 'localhost';
-$dbname = 'bella';
-$username = 'root';
-$password = '';
+$host = getenv('DB_HOST') ?: 'localhost';
+$dbname = getenv('DB_NAME') ?: 'bella';
+$username = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASSWORD') ?: '';
 
-$dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
+$port = getenv('DB_PORT') ?: '3306';
+$dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
 
 $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,

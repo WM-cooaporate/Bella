@@ -113,9 +113,10 @@ document.getElementById("payment-form").addEventListener("submit", async (event)
     body.append("transaction_reference", document.getElementById("transaction-reference").value.trim());
     body.append("receipt", file);
     try {
-        await apiRequest("submit_payment", { method: "POST", body });
+        const paymentResult = await apiRequest("submit_payment", { method: "POST", body });
         paymentSection.classList.add("hidden");
         document.getElementById("confirmation-number").textContent = currentOrder.order_number;
+        document.getElementById("confirmation-message").textContent = `${paymentResult.message}. Your receipt is stored privately. Bella can review the full order and receipt in the admin dashboard.`;
         document.getElementById("confirmation").classList.remove("hidden");
         document.getElementById("track-number").value = currentOrder.order_number;
         document.getElementById("confirmation").scrollIntoView({ behavior: "smooth" });

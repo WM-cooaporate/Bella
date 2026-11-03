@@ -1,0 +1,5 @@
+.git
+backend/.env
+backend/uploads
+backend/private_uploads
+**/.DS_Store

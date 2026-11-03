@@ -157,12 +157,13 @@ class PaymentController
 
             $extension = $extensionMap[$mimeType];
 
-            $backendRoot = dirname(__DIR__, 2);
+            $storageRoot = getenv('BELLA_STORAGE_PATH');
+            $storageRoot = is_string($storageRoot) && $storageRoot !== ''
+                ? rtrim($storageRoot, DIRECTORY_SEPARATOR)
+                : dirname(__DIR__, 2);
 
             $receiptDirectory =
-                $backendRoot .
-                DIRECTORY_SEPARATOR .
-                'private_uploads' .
+                $storageRoot .
                 DIRECTORY_SEPARATOR .
                 'receipts';
 
@@ -183,8 +184,7 @@ class PaymentController
                 DIRECTORY_SEPARATOR .
                 $fileName;
 
-            $relativePath =
-                'private_uploads/receipts/' . $fileName;
+            $relativePath = 'receipts/' . $fileName;
 
             if (!move_uploaded_file($temporaryPath, $destination)) {
                 throw new RuntimeException(
@@ -442,12 +442,13 @@ class PaymentController
                 return;
             }
 
-            $backendRoot = dirname(__DIR__, 2);
+            $storageRoot = getenv('BELLA_STORAGE_PATH');
+            $storageRoot = is_string($storageRoot) && $storageRoot !== ''
+                ? rtrim($storageRoot, DIRECTORY_SEPARATOR)
+                : dirname(__DIR__, 2);
 
             $receiptsRoot = realpath(
-                $backendRoot .
-                DIRECTORY_SEPARATOR .
-                'private_uploads' .
+                $storageRoot .
                 DIRECTORY_SEPARATOR .
                 'receipts'
             );
@@ -466,11 +467,7 @@ class PaymentController
                 $payment['receipt_path']
             );
 
-            $expectedPrefix =
-                'private_uploads' .
-                DIRECTORY_SEPARATOR .
-                'receipts' .
-                DIRECTORY_SEPARATOR;
+            $expectedPrefix = 'receipts' . DIRECTORY_SEPARATOR;
 
             if (!str_starts_with($relativePath, $expectedPrefix)) {
                 $this->respond(404, [
@@ -481,7 +478,7 @@ class PaymentController
             }
 
             $filePath = realpath(
-                $backendRoot .
+                $storageRoot .
                 DIRECTORY_SEPARATOR .
                 $relativePath
             );

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: bella-store
+    runtime: docker
+    plan: starter
+    healthCheckPath: /backend/public/index.php?action=products
+    disk:
+      name: bella-receipts
+      mountPath: /var/lib/bella
+      sizeGB: 1
+    envVars:
+      - key: BELLA_STORAGE_PATH
+        value: /var/lib/bella
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_NAME
+        value: bella
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
