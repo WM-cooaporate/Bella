@@ -26,7 +26,7 @@ function updateInvoice() {
     invoicePrice.textContent = formatMoney(selectedProduct.price);
     invoiceQuantity.textContent = String(quantity);
     invoiceTotal.textContent = formatMoney(Number(selectedProduct.price) * quantity);
-    document.getElementById("summary-image").src = selectedProduct.image ? new URL(selectedProduct.image, API_URL).href : "assets/images/p1.jpg";
+    document.getElementById("summary-image").src = selectedProduct.image ? new URL(selectedProduct.image, new URL("../", window.location.href)).href : "assets/images/p1.jpg";
 }
 
 quantityInput.addEventListener("input", updateInvoice);
@@ -54,8 +54,42 @@ document.getElementById("order-form").addEventListener("submit", async (event) =
 document.querySelectorAll('[name="payment_method"]').forEach((input) => input.addEventListener("change", () => {
     const details = document.getElementById("transfer-details");
     details.classList.remove("hidden");
-    document.getElementById("transfer-instructions").textContent = input.value === "INSTAPAY" ? "Transfer the exact amount to Bella using InstaPay, then attach your transfer receipt." : "Transfer the exact amount to Bella using Orange Cash, then attach your wallet receipt.";
+    const instapay = input.value === "INSTAPAY";
+    const config = window.BELLA_PAYMENT_CONFIG || {};
+    const destination = instapay ? config.instapayAlias : config.orangeCashNumber;
+    const instruction = document.getElementById("transfer-instructions");
+    const link = document.getElementById("instapay-link");
+    const orangeAppLink = document.getElementById("orange-app-link");
+    const orangeRow = document.getElementById("orange-number-row");
+    const copyButton = document.getElementById("copy-destination");
+    document.getElementById("payment-error").textContent = "";
+    link.classList.toggle("hidden", !instapay || !destination);
+    orangeAppLink.classList.toggle("hidden", instapay || !destination);
+    orangeRow.classList.toggle("hidden", instapay || !destination);
+    copyButton.classList.toggle("hidden", !destination);
+    if (instapay) {
+        instruction.textContent = destination ? `Open InstaPay and transfer ${formatMoney(currentOrder.total_amount)} to Bella’s alias: ${destination}. Then upload the successful transfer receipt.` : "Bella’s InstaPay alias is not configured. Ask the store for its payment details before transferring.";
+        link.href = destination ? `https://instapay.eg/` : "https://instapay.eg/";
+        copyButton.dataset.destination = destination || "";
+    } else {
+        instruction.textContent = destination ? `Transfer exactly ${formatMoney(currentOrder.total_amount)} to this Orange Cash wallet, then upload the successful transfer receipt.` : "Bella’s Orange Cash number is not configured. Ask the store for its wallet number before transferring.";
+        document.getElementById("orange-number").value = destination || "Not configured";
+        orangeAppLink.href = `orangecash://send?phone=${encodeURIComponent(destination || "")}&amount=${encodeURIComponent(currentOrder.total_amount)}`;
+        copyButton.dataset.destination = destination || "";
+    }
+    document.getElementById("receipt-file").required = true;
 }));
+
+document.getElementById("copy-destination").addEventListener("click", async () => {
+    const value = document.getElementById("copy-destination").dataset.destination;
+    if (!value) return;
+    try {
+        await navigator.clipboard.writeText(value);
+        document.getElementById("copy-destination").textContent = "Copied";
+    } catch {
+        document.getElementById("payment-error").textContent = "Could not copy automatically. Select and copy the destination instead.";
+    }
+});
 
 document.getElementById("receipt-file").addEventListener("change", (event) => {
     const file = event.target.files[0];
