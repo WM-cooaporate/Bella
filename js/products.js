@@ -5,20 +5,20 @@ const products = [
         name: "Premium Watch",
         description: "Elegant design for everyday use.",
         price: 1200,
-        image: "assets/images/product-1.jpg"
+        image: "assets/images/p1.jpg"
     },
     {
         id: 2,
         name: "Classic Bag",
         description: "A stylish bag with excellent quality.",
         price: 850,
-        image: "assets/images/product-2.jpg"
+        image: "assets/images/p2.jpg"
     },
     {
         id: 3,
         name: "Modern Shoes",
         description: "Comfortable shoes with modern style.",
         price: 1500,
-        image: "assets/images/product-3.jpg"
+        image: "assets/images/p3.jpg"
     }
 ];
