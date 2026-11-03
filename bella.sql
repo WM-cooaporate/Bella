@@ -36,11 +36,7 @@ CREATE TABLE `admins` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `admins`
---
-
-INSERT INTO `admins` (`id`, `username`, `email`, `password_hash`, `created_at`) VALUES
-(1, 'admin', 'admin@bella.local', '$2y$10$LVT24LFlGpKk4ChpI3txAeduHN6RSzW7VSoNoap4kVV9db3XFEeOu', '2026-11-03 21:41:27');
+-- Production admin accounts must be created with a unique password hash.
 
 -- --------------------------------------------------------
 
@@ -63,14 +59,6 @@ CREATE TABLE `orders` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`id`, `order_number`, `customer_name`, `phone`, `address`, `total_amount`, `order_status`, `created_at`, `updated_at`, `reservation_expires_at`, `stock_reserved`) VALUES
-(1, 'BELLA-76A524E2', 'Test Customer', '01012345678', 'Cairo, Egypt', 500.00, 'PENDING_PAYMENT', '2026-11-03 21:09:14', '2026-11-03 21:09:14', NULL, 0),
-(2, 'BELLA-F98431C2', 'Wasem Ayman', '01125993315', 'العشرة شرق المحطة, لا يوجد', 250.00, 'PENDING_PAYMENT', '2026-11-03 21:15:17', '2026-11-03 21:15:17', NULL, 0),
-(3, 'BELLA-9CD51AA0', 'Inventory Test', '01012345678', 'Cairo', 500.00, 'CANCELLED', '2026-11-03 21:21:08', '2026-11-03 21:27:30', NULL, 0),
-(4, 'BELLA-21CBD352', 'Payment Test', '01012345678', 'Cairo', 250.00, 'PENDING_PAYMENT', '2026-11-03 21:32:33', '2026-11-03 21:32:33', '2026-11-03 22:02:33', 1);
 
 -- --------------------------------------------------------
 
@@ -89,14 +77,6 @@ CREATE TABLE `order_items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `order_items`
---
-
-INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `product_name`, `unit_price`, `quantity`, `subtotal`) VALUES
-(1, 1, 1, 'Bella Test Product', 250.00, 2, 500.00),
-(2, 2, 1, 'Bella Test Product', 250.00, 1, 250.00),
-(3, 3, 1, 'Bella Test Product', 250.00, 2, 500.00),
-(4, 4, 1, 'Bella Test Product', 250.00, 1, 250.00);
 
 -- --------------------------------------------------------
 
@@ -119,11 +99,6 @@ CREATE TABLE `payments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `payments`
---
-
-INSERT INTO `payments` (`id`, `order_id`, `payment_method`, `amount`, `transaction_reference`, `receipt_path`, `payment_status`, `admin_note`, `reviewed_at`, `created_at`, `updated_at`) VALUES
-(1, 4, 'INSTAPAY', 250.00, 'TEST-BELLA-004', 'uploads/receipts/b9cd47bb4f4c675648e64e84dbfd995c.jpg', 'PENDING', NULL, NULL, '2026-11-03 21:39:54', '2026-11-03 21:39:54');
 
 -- --------------------------------------------------------
 
@@ -144,11 +119,7 @@ CREATE TABLE `products` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `products`
---
-
-INSERT INTO `products` (`id`, `name`, `description`, `price`, `image`, `stock_quantity`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'Bella Test Product', 'This is a test product', 250.00, 'assets/images/p1.jpg', 9, 1, '2026-11-03 20:44:11', '2026-11-03 21:32:33');
+-- Add production products through the products table before launch.
 
 --
 -- Indexes for dumped tables
@@ -199,31 +170,31 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT for table `admins`
 --
 ALTER TABLE `admins`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables

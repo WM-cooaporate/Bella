@@ -26,7 +26,7 @@ function updateInvoice() {
     invoicePrice.textContent = formatMoney(selectedProduct.price);
     invoiceQuantity.textContent = String(quantity);
     invoiceTotal.textContent = formatMoney(Number(selectedProduct.price) * quantity);
-    document.getElementById("summary-image").src = selectedProduct.image ? new URL(selectedProduct.image, new URL("../", window.location.href)).href : "assets/images/p1.jpg";
+    document.getElementById("summary-image").src = productImageUrl(selectedProduct.image);
 }
 
 quantityInput.addEventListener("input", updateInvoice);

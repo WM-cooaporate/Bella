@@ -106,6 +106,18 @@ try {
         exit;
     }
 
+    if ($method === 'GET' && $action === 'product_image') {
+        $productController->image(is_string($_GET['file'] ?? null) ? $_GET['file'] : '');
+        exit;
+    }
+
+    if ($method === 'POST' && $action === 'admin_create_product') {
+        AuthMiddleware::requireAdmin();
+        AuthMiddleware::requireCsrf();
+        $productController->store($_POST, $_FILES);
+        exit;
+    }
+
     // POST /?action=admin_login
     if ($method === 'POST' && $action === 'admin_login') {
         $authController->login($requestData);
@@ -272,6 +284,8 @@ if (
 
     $knownActions = [
         'products',
+        'product_image',
+        'admin_create_product',
         'admin_login',
         'create_order',
         'order_status',

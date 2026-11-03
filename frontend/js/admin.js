@@ -108,6 +108,57 @@ document.getElementById("load-more").addEventListener("click", () => loadOrders(
 document.querySelectorAll(".admin-tab").forEach((tab) => tab.addEventListener("click", () => {
     document.querySelectorAll(".admin-tab").forEach((item) => item.classList.toggle("active", item === tab));
     document.querySelectorAll(".admin-panel").forEach((panel) => panel.classList.toggle("hidden", panel.id !== tab.dataset.panel));
+    if (tab.dataset.panel === "products-panel") loadAdminProducts();
 }));
+
+const productForm = document.getElementById("product-form");
+const productImageInput = document.getElementById("product-image");
+
+productImageInput.addEventListener("change", () => {
+    const file = productImageInput.files[0];
+    const preview = document.getElementById("product-image-preview");
+    if (!file) { preview.classList.add("hidden"); return; }
+    if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
+        document.getElementById("product-error").textContent = "Choose an image up to 5 MB.";
+        productImageInput.value = "";
+        preview.classList.add("hidden");
+        return;
+    }
+    document.getElementById("product-error").textContent = "";
+    document.getElementById("product-preview").src = URL.createObjectURL(file);
+    preview.classList.remove("hidden");
+});
+
+productForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const error = document.getElementById("product-error");
+    const button = document.getElementById("product-submit");
+    error.textContent = "";
+    if (!productImageInput.files[0]) { error.textContent = "Choose a product photo."; return; }
+    button.disabled = true;
+    const body = new FormData();
+    body.append("name", document.getElementById("product-name").value.trim());
+    body.append("price", document.getElementById("product-price").value);
+    body.append("description", document.getElementById("product-description").value.trim());
+    body.append("stock_quantity", document.getElementById("product-stock").value);
+    body.append("image", productImageInput.files[0]);
+    try {
+        await adminRequest("admin_create_product", { method: "POST", body });
+        toast("Product added to the storefront.");
+        productForm.reset();
+        document.getElementById("product-preview").removeAttribute("src");
+        document.getElementById("product-image-preview").classList.add("hidden");
+        await loadAdminProducts();
+    } catch (requestError) { error.textContent = requestError.message; }
+    finally { button.disabled = false; }
+});
+
+async function loadAdminProducts() {
+    const target = document.getElementById("admin-products");
+    try {
+        const products = (await adminRequest("products")).data || [];
+        target.innerHTML = products.map((product) => `<article class="product-card"><div class="product-photo"><img src="${escapeHTML(productImageUrl(product.image))}" alt="${escapeHTML(product.name)}" loading="lazy"></div><div class="product-info"><h3>${escapeHTML(product.name)}</h3><div class="product-bottom"><span class="product-price">${formatMoney(product.price)}</span><span>${Number(product.stock_quantity)} in stock</span></div></div></article>`).join("") || '<p class="empty-state">No active products yet.</p>';
+    } catch (requestError) { target.innerHTML = `<p class="empty-state">${escapeHTML(requestError.message)}</p>`; }
+}
 
 checkSession();

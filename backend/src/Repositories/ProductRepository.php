@@ -34,4 +34,20 @@ class ProductRepository
 
         return $stmt->fetchAll();
     }
+
+    public function create(array $product): int
+    {
+        $stmt = $this->db->prepare("
+            INSERT INTO products (name, description, price, image, stock_quantity, is_active)
+            VALUES (:name, :description, :price, :image, :stock_quantity, 1)
+        ");
+        $stmt->execute([
+            ':name' => $product['name'],
+            ':description' => $product['description'],
+            ':price' => $product['price'],
+            ':image' => $product['image'],
+            ':stock_quantity' => $product['stock_quantity']
+        ]);
+        return (int) $this->db->lastInsertId();
+    }
 }
