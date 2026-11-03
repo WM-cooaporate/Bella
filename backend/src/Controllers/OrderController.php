@@ -218,6 +218,34 @@ class OrderController
         }
     }
 
+    /** Look up an order using its public order number and customer phone. */
+    public function status(array $data): void
+    {
+        $orderNumber = $data['order_number'] ?? null;
+        $phone = $data['phone'] ?? null;
+        if (!is_string($orderNumber) || !is_string($phone)) {
+            $this->respond(422, ['success' => false, 'message' => 'Order number and phone are required']);
+            return;
+        }
+        $orderNumber = trim($orderNumber);
+        $phone = trim($phone);
+        if (!preg_match('/^BELLA-[A-F0-9]{8}$/i', $orderNumber) || !preg_match('/^01[0125][0-9]{8}$/', $phone)) {
+            $this->respond(422, ['success' => false, 'message' => 'Enter a valid order number and Egyptian mobile number']);
+            return;
+        }
+        try {
+            $order = $this->orderRepository->findPublicStatus(strtoupper($orderNumber), $phone);
+            if ($order === false) {
+                $this->respond(404, ['success' => false, 'message' => 'We could not find an order matching those details']);
+                return;
+            }
+            $this->respond(200, ['success' => true, 'message' => 'Order status retrieved successfully', 'data' => $order]);
+        } catch (Throwable $e) {
+            error_log('OrderController::status: ' . $e->getMessage());
+            $this->respond(500, ['success' => false, 'message' => 'Unable to retrieve order status']);
+        }
+    }
+
     /**
      * Get all orders for the admin dashboard.
      */

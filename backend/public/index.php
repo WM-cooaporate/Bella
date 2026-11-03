@@ -118,6 +118,12 @@ try {
         exit;
     }
 
+    // POST /?action=order_status
+    if ($method === 'POST' && $action === 'order_status') {
+        $orderController->status($requestData);
+        exit;
+    }
+
     // POST multipart/form-data /?action=submit_payment
     if ($method === 'POST' && $action === 'submit_payment') {
         $paymentController->store($_POST, $_FILES);
@@ -268,10 +274,12 @@ if (
         'products',
         'admin_login',
         'create_order',
+        'order_status',
         'submit_payment',
         'check_admin_session',
         'get_pending_payments',
         'payment_receipt',
+    'get_orders',
         'admin_logout',
         'approve_payment',
         'reject_payment',

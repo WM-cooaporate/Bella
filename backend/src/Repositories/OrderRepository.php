@@ -344,6 +344,13 @@ class OrderRepository
     return $stmt->fetchAll();
 }
 
+public function findPublicStatus(string $orderNumber, string $phone): array|false
+{
+    $stmt = $this->db->prepare("SELECT order_number, total_amount, order_status, created_at FROM orders WHERE order_number = :order_number AND phone = :phone LIMIT 1");
+    $stmt->execute([':order_number' => $orderNumber, ':phone' => $phone]);
+    return $stmt->fetch();
+}
+
 public function countAll(): int
 {
     $stmt = $this->db->query("
