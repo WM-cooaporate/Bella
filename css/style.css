@@ -1,0 +1,398 @@
+
+/* General */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #222222;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* Navbar */
+.navbar {
+    width: 100%;
+    padding: 22px 0;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #222;
+    text-decoration: none;
+}
+
+.logo span {
+    color: #d49b52;
+}
+
+.nav-links {
+    display: flex;
+    gap: 35px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #555;
+    font-size: 15px;
+}
+
+.nav-links a:hover {
+    color: #d49b52;
+}
+
+.nav-button,
+.primary-button {
+    display: inline-block;
+    padding: 13px 25px;
+    background-color: #222;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+.nav-button:hover,
+.primary-button:hover {
+    background-color: #d49b52;
+}
+
+/* Hero */
+.hero {
+    padding: 90px 0;
+    background-color: #faf8f5;
+}
+
+.hero-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 50px;
+}
+
+.hero-text {
+    flex: 1;
+}
+
+.hero-label {
+    color: #b88646;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.hero-text h1 {
+    font-size: 55px;
+    line-height: 1.2;
+    margin: 25px 0;
+}
+
+.hero-text h1 span {
+    display: block;
+    color: #c18c4d;
+}
+
+.hero-text p {
+    max-width: 480px;
+    color: #777;
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 30px;
+}
+
+.hero-image {
+    flex: 1;
+}
+
+.hero-image img {
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+
+    .nav-links {
+        display: none;
+    }
+
+    .hero {
+        padding: 55px 0;
+    }
+
+    .hero-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero-text h1 {
+        font-size: 38px;
+    }
+
+    .hero-text p {
+        margin: 0 auto 25px;
+    }
+
+    .hero-image img {
+        height: 300px;
+    }
+}
+
+/* Products Section */
+
+.products-section {
+    padding: 90px 0;
+}
+
+.section-heading {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.section-heading span {
+    color: #b88646;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.section-heading h2 {
+    font-size: 36px;
+    margin: 15px 0;
+}
+
+.section-heading p {
+    color: #777;
+    font-size: 15px;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.product-card {
+    border: 1px solid #eeeeee;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: 0.3s;
+}
+
+.product-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.product-card img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+}
+
+.product-info {
+    padding: 22px;
+}
+
+.product-info h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.product-info p {
+    color: #777;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.product-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.product-price {
+    color: #b88646;
+    font-weight: bold;
+}
+
+.order-button {
+    background: #222;
+    color: white;
+    border: none;
+    padding: 11px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.order-button:hover {
+    background: #b88646;
+}
+
+@media (max-width: 768px) {
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Order Section */
+
+.hidden {
+    display: none;
+}
+
+.order-section {
+    padding: 90px 0;
+    background-color: #faf8f5;
+}
+
+.order-wrapper {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 30px;
+    max-width: 950px;
+    margin: auto;
+}
+
+.order-form,
+.invoice {
+    background: white;
+    padding: 30px;
+    border: 1px solid #eeeeee;
+    border-radius: 10px;
+}
+
+.order-form h3,
+.invoice h3 {
+    margin-bottom: 25px;
+    font-size: 21px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #dddddd;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+}
+
+.form-group textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #c18c4d;
+}
+
+.invoice {
+    height: fit-content;
+}
+
+.invoice-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 22px;
+    font-size: 14px;
+}
+
+.invoice-row span {
+    color: #777;
+}
+
+.invoice-row strong {
+    text-align: right;
+}
+
+.invoice-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid #eeeeee;
+    font-size: 17px;
+}
+
+.invoice-total strong {
+    color: #b88646;
+    font-size: 22px;
+}
+
+@media (max-width: 768px) {
+
+    .order-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .order-form,
+    .invoice {
+        padding: 22px;
+    }
+
+}
+
+/* WhatsApp Button */
+
+.whatsapp-button {
+    width: 100%;
+    margin-top: 25px;
+    padding: 15px;
+    background-color: #25D366;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.whatsapp-button:hover {
+    background-color: #1da851;
+}
