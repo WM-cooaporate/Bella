@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import './css/style.css';
 
 const apiOrigin = import.meta.env.VITE_BELLA_API_ORIGIN || '';
 const request = async (path, options = {}) => {

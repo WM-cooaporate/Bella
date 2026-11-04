@@ -27,6 +27,7 @@ CREATE TABLE orders (
     phone VARCHAR(20) NOT NULL,
     address TEXT NOT NULL,
     total_amount NUMERIC(10,2) NOT NULL,
+    delivery_fee NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (delivery_fee >= 0),
     order_status VARCHAR(24) NOT NULL DEFAULT 'PENDING_PAYMENT'
         CHECK (order_status IN ('PENDING_PAYMENT', 'PROCESSING', 'COMPLETED', 'CANCELLED')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

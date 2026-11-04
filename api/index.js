@@ -77,17 +77,27 @@ function parseProductId(value) {
   return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
 
-async function reserveOrder(client, body, productId) {
+function getDeliveryFee() {
+  const value = process.env.BELLA_DELIVERY_FEE_EGP;
+  if (typeof value !== 'string' || !/^\d+(?:\.\d{1,2})?$/.test(value) || !Number.isFinite(Number(value))) {
+    throw Object.assign(new Error('Checkout is not configured'), { status: 503 });
+  }
+  return Number(value).toFixed(2);
+}
+
+async function reserveOrder(client, body, productId, deliveryFee = 0) {
   const found = await client.query('SELECT id,name,price,stock_quantity FROM products WHERE id=$1 AND is_active=true FOR UPDATE', [productId]);
   if (!found.rowCount) throw Object.assign(new Error('Product not found'), { status: 404 });
   const product = found.rows[0];
   if (product.stock_quantity < body.quantity) throw Object.assign(new Error('Insufficient stock'), { status: 409 });
-  const total = (Number(product.price) * body.quantity).toFixed(2);
+  const subtotal = (Number(product.price) * body.quantity).toFixed(2);
+  const shipping = Number(deliveryFee).toFixed(2);
+  const total = (Number(subtotal) + Number(shipping)).toFixed(2);
   const orderNumber = `BELLA-${randomBytes(4).toString('hex').toUpperCase()}`;
   await client.query('UPDATE products SET stock_quantity=stock_quantity-$1,updated_at=now() WHERE id=$2', [body.quantity, product.id]);
-  const inserted = await client.query("INSERT INTO orders(order_number,customer_name,phone,address,total_amount,order_status,reservation_expires_at,stock_reserved) VALUES($1,$2,$3,$4,$5,'PENDING_PAYMENT',now()+interval '30 minutes',true) RETURNING id", [orderNumber, body.customer_name.trim(), body.phone, body.address.trim(), total]);
-  await client.query('INSERT INTO order_items(order_id,product_id,product_name,unit_price,quantity,subtotal) VALUES($1,$2,$3,$4,$5,$6)', [inserted.rows[0].id, product.id, product.name, product.price, body.quantity, total]);
-  return { order_id: inserted.rows[0].id, order_number: orderNumber, total_amount: total };
+  const inserted = await client.query("INSERT INTO orders(order_number,customer_name,phone,address,total_amount,delivery_fee,order_status,reservation_expires_at,stock_reserved) VALUES($1,$2,$3,$4,$5,$6,'PENDING_PAYMENT',now()+interval '30 minutes',true) RETURNING id", [orderNumber, body.customer_name.trim(), body.phone, body.address.trim(), total, shipping]);
+  await client.query('INSERT INTO order_items(order_id,product_id,product_name,unit_price,quantity,subtotal) VALUES($1,$2,$3,$4,$5,$6)', [inserted.rows[0].id, product.id, product.name, product.price, body.quantity, subtotal]);
+  return { order_id: inserted.rows[0].id, order_number: orderNumber, total_amount: total, delivery_fee: shipping };
 }
 
 function readMultipart(req, limit) {
@@ -176,6 +186,10 @@ async function applyPaymentDecision(client, payment, decision, paymentId) {
 async function route(req, res, action, parts) {
   const method = req.method;
   if (action === 'health' && method === 'GET') return send(res, 200, ok({ service: 'bella-api' }));
+  if (action === 'checkout/config' && method === 'GET') {
+    try { return send(res, 200, ok({ delivery_fee: getDeliveryFee() })); }
+    catch { return send(res, 503, fail('Checkout is being prepared')); }
+  }
   if (!process.env.DATABASE_URL) return send(res, 503, fail('Database service is not configured'));
   if (action === 'cron/expire-reservations' && method === 'GET') {
     if (!process.env.CRON_SECRET || req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) return send(res, 401, fail('Authentication required'));
@@ -203,8 +217,9 @@ async function route(req, res, action, parts) {
     const body = req.body || {};
     const productId = parseProductId(body.product_id);
     if (typeof body.customer_name !== 'string' || !body.customer_name.trim() || body.customer_name.length > 150 || !/^01[0125][0-9]{8}$/.test(body.phone || '') || typeof body.address !== 'string' || !body.address.trim() || body.address.length > 2000 || productId === null || !Number.isInteger(body.quantity) || body.quantity < 1 || body.quantity > 100) return send(res, 422, fail('Check customer, phone, address, product, and quantity'));
+    const deliveryFee = getDeliveryFee();
     await cleanupExpiredReservations();
-    const order = await transaction(client => reserveOrder(client, body, productId));
+    const order = await transaction(client => reserveOrder(client, body, productId, deliveryFee));
     return send(res, 201, ok(order));
   }
   if (action === 'orders/status' && method === 'POST') {
@@ -334,4 +349,4 @@ module.exports = async function handler(req, res) {
 
 module.exports.identify = identify;
 module.exports.cleanupExpiredReservations = cleanupExpiredReservations;
-module.exports._test = { route, signSession, readSession, applyPaymentDecision, parseProductId, reserveOrder };
+module.exports._test = { route, signSession, readSession, applyPaymentDecision, parseProductId, reserveOrder, getDeliveryFee };

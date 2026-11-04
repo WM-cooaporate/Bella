@@ -37,6 +37,22 @@ test('invalid order status input returns a validation response', async () => {
   assert.equal(res.statusCode, 422);
 });
 
+test('public checkout config requires a valid configured delivery fee', async () => {
+  const previous = process.env.BELLA_DELIVERY_FEE_EGP;
+  delete process.env.BELLA_DELIVERY_FEE_EGP;
+  const missing = response();
+  await route({ method: 'GET', query: {} }, missing, 'checkout/config', ['checkout', 'config']);
+  assert.equal(missing.statusCode, 503);
+  process.env.BELLA_DELIVERY_FEE_EGP = '75.5';
+  const configured = response();
+  await route({ method: 'GET', query: {} }, configured, 'checkout/config', ['checkout', 'config']);
+  assert.equal(configured.statusCode, 200);
+  assert.equal(configured.body.data.delivery_fee, '75.50');
+  process.env.BELLA_DELIVERY_FEE_EGP = '1.234';
+  assert.throws(() => handler._test.getDeliveryFee(), { status: 503 });
+  if (previous === undefined) delete process.env.BELLA_DELIVERY_FEE_EGP; else process.env.BELLA_DELIVERY_FEE_EGP = previous;
+});
+
 test('checkout accepts PostgreSQL bigint product ids returned as strings', () => {
   assert.equal(handler._test.parseProductId('42'), 42);
   assert.equal(handler._test.parseProductId(42), 42);
@@ -54,10 +70,12 @@ test('stock reservation stores a price snapshot and rejects overselling', async 
     return { rows: [], rowCount: 1 };
   } };
   const body = { customer_name: 'A Customer', phone: '01012345678', address: 'Cairo', quantity: 2 };
-  const order = await handler._test.reserveOrder(client, body, 9);
-  assert.equal(order.total_amount, '25.00');
+  const order = await handler._test.reserveOrder(client, body, 9, 75.5);
+  assert.equal(order.total_amount, '100.50');
+  assert.equal(order.delivery_fee, '75.50');
   assert.match(order.order_number, /^BELLA-[A-F0-9]{8}$/);
   assert.deepEqual(calls.find(call => call.sql.startsWith('UPDATE products')).params, [2, '9']);
+  assert.deepEqual(calls.find(call => call.sql.startsWith('INSERT INTO orders')).params.slice(-2), ['100.50', '75.50']);
   assert.match(calls.find(call => call.sql.startsWith('INSERT INTO orders')).sql, /now\(\)\+interval '30 minutes'/);
   assert.deepEqual(calls.find(call => call.sql.startsWith('INSERT INTO order_items')).params.slice(2), ['Linen pouch', '12.50', 2, '25.00']);
   client.query = async sql => sql.startsWith('SELECT id,name,price') ? { rowCount: 1, rows: [{ id: 9, name: 'Linen pouch', price: '12.50', stock_quantity: 1 }] } : { rows: [] };
@@ -161,4 +179,7 @@ test('production storefront requires a configured public payment destination', a
   assert.match(source, /VITE_ORANGE_CASH_NUMBER/);
   assert.match(source, /!paymentReady/);
   assert.match(source, /form\.set\('payment_method', paymentMethod\)/);
+  assert.match(source, /api\('checkout\/config'/);
+  assert.match(source, /payment-breakdown/);
+  assert.match(source, /required=\{available\}/);
 });
