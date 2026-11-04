@@ -1,0 +1,26 @@
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: ${COOKIE_SECURE:true}
+        same-site: ${COOKIE_SAME_SITE:none}
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/bella}
+    username: ${DB_USER:bella}
+    password: ${DB_PASSWORD:}
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+bella:
+  storage-path: ${BELLA_STORAGE_PATH:./bella-data}
+  admin:
+    username: ${BELLA_ADMIN_USERNAME:}
+    password: ${BELLA_ADMIN_PASSWORD:}
+  cors-origin: ${BELLA_CORS_ORIGIN:http://localhost:5173}

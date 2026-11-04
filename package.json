@@ -1,8 +1,16 @@
 {
-  "name": "bella-storefront-preview",
+  "name": "bella-storefront",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "node scripts/build.mjs"
-  }
+    "build": "vite build --config frontend/vite.config.js",
+    "dev": "vite --config frontend/vite.config.js --host 0.0.0.0"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {}
 }

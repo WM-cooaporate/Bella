@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.bella.BellaApiIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.733 s -- in com.bella.BellaApiIntegrationTest

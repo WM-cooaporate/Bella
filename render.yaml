@@ -1,23 +1,25 @@
 services:
   - type: web
-    name: bella-store
+    name: bella-api
     runtime: docker
     plan: starter
-    healthCheckPath: /backend/public/index.php?action=products
+    healthCheckPath: /api/products
     disk:
-      name: bella-receipts
+      name: bella-private-uploads
       mountPath: /var/lib/bella
       sizeGB: 1
     envVars:
       - key: BELLA_STORAGE_PATH
         value: /var/lib/bella
-      - key: DB_HOST
+      - key: DATABASE_URL
         sync: false
-      - key: DB_PORT
-        value: "3306"
-      - key: DB_NAME
-        value: bella
       - key: DB_USER
         sync: false
       - key: DB_PASSWORD
+        sync: false
+      - key: BELLA_ADMIN_USERNAME
+        sync: false
+      - key: BELLA_ADMIN_PASSWORD
+        sync: false
+      - key: BELLA_CORS_ORIGIN
         sync: false

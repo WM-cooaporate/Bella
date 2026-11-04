@@ -1,17 +1,12 @@
-FROM php:8.3-apache
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY backend/pom.xml ./pom.xml
+COPY backend/src ./src
+RUN mvn -B -DskipTests package
 
-RUN docker-php-ext-install pdo_mysql \
-    && a2enmod rewrite headers
-
-ENV APACHE_DOCUMENT_ROOT=/var/www/html
-ENV BELLA_STORAGE_PATH=/var/lib/bella
-
-COPY frontend/ /var/www/html/
-COPY backend/ /var/www/backend/
-COPY deploy/apache-bella.conf /etc/apache2/sites-available/000-default.conf
-
-RUN mkdir -p /var/lib/bella/receipts /var/lib/bella/product-images \
-    && chown -R www-data:www-data /var/lib/bella \
-    && chown -R www-data:www-data /var/www/backend
-
-EXPOSE 80
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/target/bella-api-1.0.0.jar app.jar
+ENV PORT=8080
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
