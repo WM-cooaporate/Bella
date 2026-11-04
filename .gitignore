@@ -1,4 +1,6 @@
 .env
+.vercel
+dist/
 .env.*
 !.env.example
 backend/.env

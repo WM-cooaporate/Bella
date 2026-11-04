@@ -32,94 +32,50 @@ function updateInvoice() {
 quantityInput.addEventListener("input", updateInvoice);
 document.getElementById("change-product").addEventListener("click", () => document.getElementById("products").scrollIntoView({ behavior: "smooth" }));
 
-document.getElementById("order-form").addEventListener("submit", async (event) => {
+document.getElementById("order-form").addEventListener("submit", (event) => {
     event.preventDefault();
     const error = document.getElementById("order-error");
     error.textContent = "";
     if (!selectedProduct) { error.textContent = "Choose a product first."; return; }
-    const submit = event.currentTarget.querySelector('[type="submit"]');
-    submit.disabled = true;
-    try {
-        const response = await apiRequest("create_order", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customer_name: document.getElementById("customer-name").value.trim(), phone: document.getElementById("customer-phone").value.trim(), address: document.getElementById("customer-address").value.trim(), product_id: Number(selectedProduct.id), quantity: Number(quantityInput.value) }) });
-        currentOrder = response.data;
-        document.getElementById("payment-order-number").textContent = currentOrder.order_number;
-        document.getElementById("payment-total").textContent = formatMoney(currentOrder.total_amount);
-        orderSection.classList.add("hidden");
-        paymentSection.classList.remove("hidden");
-        paymentSection.scrollIntoView({ behavior: "smooth" });
-    } catch (requestError) { error.textContent = requestError.message; }
-    finally { submit.disabled = false; }
+    currentOrder = { order_number: `DEMO-${Math.random().toString(36).slice(2, 8).toUpperCase()}`, total_amount: Number(selectedProduct.price) * Number(quantityInput.value) };
+    document.getElementById("payment-order-number").textContent = currentOrder.order_number;
+    document.getElementById("payment-total").textContent = formatMoney(currentOrder.total_amount);
+    orderSection.classList.add("hidden");
+    paymentSection.classList.remove("hidden");
+    paymentSection.scrollIntoView({ behavior: "smooth" });
 });
 
 document.querySelectorAll('[name="payment_method"]').forEach((input) => input.addEventListener("change", () => {
     const details = document.getElementById("transfer-details");
     details.classList.remove("hidden");
     const instapay = input.value === "INSTAPAY";
-    const config = window.BELLA_PAYMENT_CONFIG || {};
-    const destination = instapay ? config.instapayAlias : config.orangeCashNumber;
-    const instruction = document.getElementById("transfer-instructions");
-    const link = document.getElementById("instapay-link");
-    const orangeAppLink = document.getElementById("orange-app-link");
-    const orangeRow = document.getElementById("orange-number-row");
-    const copyButton = document.getElementById("copy-destination");
+    document.getElementById("instapay-link").classList.toggle("hidden", !instapay);
+    document.getElementById("orange-app-link").classList.toggle("hidden", instapay);
+    document.getElementById("orange-number-row").classList.add("hidden");
+    document.getElementById("copy-destination").classList.add("hidden");
     document.getElementById("payment-error").textContent = "";
-    link.classList.toggle("hidden", !instapay || !destination);
-    orangeAppLink.classList.toggle("hidden", instapay || !destination);
-    orangeRow.classList.toggle("hidden", instapay || !destination);
-    copyButton.classList.toggle("hidden", !destination);
-    if (instapay) {
-        instruction.textContent = destination ? `Open InstaPay and transfer ${formatMoney(currentOrder.total_amount)} to Bella’s alias: ${destination}. Then upload the successful transfer receipt.` : "Bella’s InstaPay alias is not configured. Ask the store for its payment details before transferring.";
-        link.href = destination ? `https://instapay.eg/` : "https://instapay.eg/";
-        copyButton.dataset.destination = destination || "";
-    } else {
-        instruction.textContent = destination ? `Transfer exactly ${formatMoney(currentOrder.total_amount)} to this Orange Cash wallet, then upload the successful transfer receipt.` : "Bella’s Orange Cash number is not configured. Ask the store for its wallet number before transferring.";
-        document.getElementById("orange-number").value = destination || "Not configured";
-        orangeAppLink.href = `orangecash://send?phone=${encodeURIComponent(destination || "")}&amount=${encodeURIComponent(currentOrder.total_amount)}`;
-        copyButton.dataset.destination = destination || "";
-    }
-    document.getElementById("receipt-file").required = true;
+    document.getElementById("transfer-instructions").textContent = instapay
+        ? `In the live store, you can pay ${formatMoney(currentOrder.total_amount)} using InstaPay. Payment details and receipt submission are disabled in this preview.`
+        : `In the live store, you can pay ${formatMoney(currentOrder.total_amount)} using Orange Cash. Payment details and receipt submission are disabled in this preview.`;
 }));
-
-document.getElementById("copy-destination").addEventListener("click", async () => {
-    const value = document.getElementById("copy-destination").dataset.destination;
-    if (!value) return;
-    try {
-        await navigator.clipboard.writeText(value);
-        document.getElementById("copy-destination").textContent = "Copied";
-    } catch {
-        document.getElementById("payment-error").textContent = "Could not copy automatically. Select and copy the destination instead.";
-    }
-});
-
-document.getElementById("receipt-file").addEventListener("change", (event) => {
-    const file = event.target.files[0];
-    document.getElementById("file-hint").textContent = file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB` : "No file selected";
-});
 
 document.getElementById("back-to-order").addEventListener("click", () => { paymentSection.classList.add("hidden"); orderSection.classList.remove("hidden"); orderSection.scrollIntoView({ behavior: "smooth" }); });
 
-document.getElementById("payment-form").addEventListener("submit", async (event) => {
+document.getElementById("payment-form").addEventListener("submit", (event) => {
     event.preventDefault();
-    const error = document.getElementById("payment-error");
-    error.textContent = "";
-    const file = document.getElementById("receipt-file").files[0];
-    if (!currentOrder) { error.textContent = "Your order session is missing. Please place your order again."; return; }
-    if (!file || file.size > 3 * 1024 * 1024 || !["image/jpeg", "image/png", "application/pdf"].includes(file.type)) { error.textContent = "Choose a JPG, PNG or PDF receipt up to 3 MB."; return; }
-    const submit = document.getElementById("payment-submit");
-    submit.disabled = true;
-    const body = new FormData();
-    body.append("order_id", currentOrder.order_id);
-    body.append("payment_method", document.querySelector('[name="payment_method"]:checked').value);
-    body.append("transaction_reference", document.getElementById("transaction-reference").value.trim());
-    body.append("receipt", file);
-    try {
-        const paymentResult = await apiRequest("submit_payment", { method: "POST", body });
-        paymentSection.classList.add("hidden");
-        document.getElementById("confirmation-number").textContent = currentOrder.order_number;
-        document.getElementById("confirmation-message").textContent = `${paymentResult.message}. Your receipt is stored privately. Bella can review the full order and receipt in the admin dashboard.`;
-        document.getElementById("confirmation").classList.remove("hidden");
-        document.getElementById("track-number").value = currentOrder.order_number;
-        document.getElementById("confirmation").scrollIntoView({ behavior: "smooth" });
-    } catch (requestError) { error.textContent = requestError.message; }
-    finally { submit.disabled = false; }
+    if (!currentOrder || !document.querySelector('[name="payment_method"]:checked')) {
+        document.getElementById("payment-error").textContent = "Choose a payment method to continue the preview.";
+        return;
+    }
+    paymentSection.classList.add("hidden");
+    document.getElementById("confirmation-number").textContent = currentOrder.order_number;
+    document.getElementById("confirmation-message").textContent = "This was a storefront preview. No payment was taken, no receipt was uploaded, and no order was saved.";
+    document.getElementById("confirmation").classList.remove("hidden");
+    document.getElementById("confirmation").scrollIntoView({ behavior: "smooth" });
+});
+
+document.getElementById("track-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    document.getElementById("track-error").textContent = "Order tracking is available in the live store. This preview does not save orders.";
+    document.getElementById("track-result").classList.add("hidden");
 });

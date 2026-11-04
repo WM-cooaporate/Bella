@@ -1,0 +1,9 @@
+backend/
+deploy/
+bella.sql
+Dockerfile
+render.yaml
+*.env
+**/*.env
+**/uploads/**
+**/private_uploads/**

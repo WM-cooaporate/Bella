@@ -1,11 +1,23 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Bella — Admin</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"></head>
-<body class="admin-body"><main class="admin-shell">
-<section class="admin-login panel" id="login-panel"><a class="brand" href="index.html">bella<span>.</span></a><p class="eyebrow">STAFF ACCESS</p><h1>Welcome back.</h1><p>Sign in to manage orders and payment reviews.</p><form id="login-form"><label class="form-group">Username<input id="username" autocomplete="username" required></label><label class="form-group">Password<input id="password" type="password" autocomplete="current-password" required></label><button class="button button-dark full-button" type="submit">Sign in <span>→</span></button><p id="login-error" class="form-error" role="alert"></p></form></section>
-<section class="admin-app hidden" id="admin-app"><header class="admin-top"><a class="brand" href="index.html">bella<span>.</span> <small>ADMIN</small></a><div><span id="admin-name"></span><button class="text-button" id="logout-button">Sign out</button></div></header><div class="admin-welcome"><div><p class="eyebrow">BELLA CONTROL ROOM</p><h1>Good work, <em id="welcome-name">team.</em></h1></div><button class="button button-dark" id="refresh-button" type="button">Refresh data ↻</button></div><div class="admin-stats" id="admin-stats"></div>
-<div class="admin-tabs"><button class="admin-tab active" data-panel="payments-panel">Payment review <span id="pending-count">0</span></button><button class="admin-tab" data-panel="orders-panel">All orders</button><button class="admin-tab" data-panel="products-panel">Products</button></div>
-<section id="payments-panel" class="admin-panel"><div class="admin-panel-head"><div><h2>Pending payments</h2><p>Check each receipt before confirming the order.</p></div></div><div id="payments-list" class="admin-list"></div></section>
-<section id="orders-panel" class="admin-panel hidden"><div class="admin-panel-head"><div><h2>All orders</h2><p>Recent orders and their current status.</p></div></div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Placed</th></tr></thead><tbody id="orders-list"></tbody></table></div><button class="button button-light hidden" id="load-more" type="button">Load more orders</button></section>
-<section id="products-panel" class="admin-panel hidden"><div class="admin-panel-head"><div><h2>Add a product</h2><p>Products added here appear in the storefront.</p></div></div><form id="product-form" class="panel product-admin-form"><label class="form-group">Product name<input id="product-name" maxlength="150" required></label><label class="form-group">Price in EGP<input id="product-price" type="number" min="0.01" step="0.01" required></label><label class="form-group">Description<textarea id="product-description" maxlength="5000"></textarea></label><label class="form-group">Available stock<input id="product-stock" type="number" min="0" value="0" required></label><label class="form-group">Product photo · JPG, PNG, WebP, up to 5 MB<input id="product-image" type="file" accept="image/jpeg,image/png,image/webp" required></label><div class="product-image-preview hidden" id="product-image-preview"><img id="product-preview" alt="Product image preview"></div><button class="button button-dark" type="submit" id="product-submit">Add product <span>→</span></button><p class="form-error" id="product-error" role="alert"></p></form><div class="admin-panel-head"><div><h2>Storefront products</h2></div></div><div id="admin-products" class="products-grid"></div></section>
-</section></main><div class="toast" id="toast" role="status"></div><script src="js/products.js"></script><script src="js/admin.js"></script></body></html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bella — Admin dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-body">
+  <main class="admin-shell">
+    <section class="panel admin-demo">
+      <a class="brand" href="index.html">bella<span>.</span></a>
+      <p class="eyebrow" style="margin-top:34px">STOREFRONT PREVIEW</p>
+      <h1>Dashboard unavailable</h1>
+      <p>This Vercel link is a static client preview. It does not connect to Bella’s PHP backend or database, so admin login, order review, and receipt viewing are disabled.</p>
+      <a class="button button-dark" href="index.html">Return to storefront <span>→</span></a>
+    </section>
+  </main>
+</body>
+</html>
