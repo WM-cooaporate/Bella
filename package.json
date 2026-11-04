@@ -5,7 +5,8 @@
   "scripts": {
     "build": "vite build --config frontend/vite.config.js",
     "dev": "vite --config frontend/vite.config.js --host 0.0.0.0",
-    "start": "vercel dev"
+    "start": "vercel dev",
+    "test": "node --test"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
