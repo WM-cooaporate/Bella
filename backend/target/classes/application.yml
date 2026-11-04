@@ -13,7 +13,7 @@ spring:
     username: ${DB_USER:bella}
     password: ${DB_PASSWORD:}
   flyway:
-    enabled: true
+    enabled: ${FLYWAY_ENABLED:false}
   servlet:
     multipart:
       max-file-size: 5MB
