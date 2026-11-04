@@ -1,26 +1,27 @@
-# Bella architecture migration
+# Bella architecture and deployment guide
 
 ## Behavior carried forward
 
 - Product catalog and inventory use PostgreSQL records; the database remains authoritative for prices and stock.
-- Checkout reserves stock under a row lock for 30 minutes and stores an order item price/name snapshot. A payment receipt pauses the reservation timeout pending manual review.
+- Checkout reserves stock under a row lock for 30 minutes and stores an order item price/name snapshot. A payment receipt pauses the reservation timeout pending manual review. Approval moves an order into processing; rejection releases its inventory and closes the order so the customer can place a fresh order.
 - Only an authenticated administrator can view receipts, review payments, list orders, or add products. Admin mutations require a session CSRF token.
-- Receipt files are kept outside the web root under `BELLA_STORAGE_PATH`; only random generated paths are stored in the database. Receipts accept JPEG, PNG, and PDF up to 3 MB; product photos accept JPEG, PNG, and WebP up to 5 MB.
+- Receipt files and product photos live in a private Supabase Storage bucket; only random generated object paths are stored in PostgreSQL. Receipts accept JPEG, PNG, and PDF up to 3 MB; product photos accept JPEG, PNG, and WebP up to 4 MB. The product photo limit is 4 MB to leave room for multipart framing under Vercel Functions' 4.5 MB total request payload ceiling. The backend streams catalog photos and only serves receipt files after admin authentication.
 - The existing `PROCESSING`/`COMPLETED`/`CANCELLED` status values are preserved. Tracking is by order number plus customer phone.
 
 ## Run locally
 
-Use Java 17+, Maven, Node.js, and PostgreSQL. Create the schema manually by running `bella-postgresql-schema.sql` against the empty Bella database before starting the API. Automatic Flyway migration is disabled by default (`FLYWAY_ENABLED=false`) to avoid conflicts with that manually-created schema. Set `DATABASE_URL` (JDBC URL), `DB_USER`, `DB_PASSWORD`, `BELLA_ADMIN_USERNAME`, `BELLA_ADMIN_PASSWORD`, and `BELLA_STORAGE_PATH`. Admin creation is opt-in at startup; no credentials are committed. Start the API with `mvn -f backend/pom.xml spring-boot:run`, and the frontend with `npm install`, `BELLA_API_ORIGIN=http://localhost:8080 npm run dev`.
+Use Node.js 20+, npm, and PostgreSQL (Supabase works). Apply `bella-postgresql-schema.sql` once to the intended empty database. Copy `.env.example` to `.env` and fill in the local values, then run `npm install`, `npm run admin:create`, `npm run dev:api`, and `npm run dev`. Set `BELLA_ADMIN_USERNAME` and a unique `BELLA_ADMIN_PASSWORD` of at least 12 characters before the one-time `npm run admin:create`; an existing username is never overwritten. The API runs on port 3000 and Vite proxies `/api` to it. The public `SUPABASE_ANON_KEY` is not used by the API; never put the service role key in a `VITE_` variable or the browser. `api/server.js` loads local `.env` variables for development.
 
-Build the static Vercel site with `npm run build`. The Spring API and PostgreSQL do not run on Vercel's static frontend. Configure API CORS to the exact frontend origin, and configure the deployed frontend API URL or hosting rewrite to the actual Spring API origin. No guessed backend domain is included. Cross-site deployment requires `SameSite=None; Secure`, credentialed CORS, and compatible browser cookie handling.
+Vercel builds the React app into `dist` and runs `api/index.js` as a Node.js Function. Connect the Vercel project to the GitHub repository and add `DATABASE_URL`, `SESSION_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET`, and `CRON_SECRET` in Vercel project settings. Copy `DATABASE_URL` from the Supabase **Transaction pooler** connection settings (port 6543) for serverless use; the function keeps a one-connection client pool. Use long random values for both secrets. Create a **private** Supabase Storage bucket named `bella-private` (or set `SUPABASE_STORAGE_BUCKET`); the service key stays server-side. The same-origin `/api/*` rewrite avoids cross-site session-cookie setup. Expired reservations are cleaned during checkout and by a secured daily Vercel Cron. On Hobby, Vercel cron runs once per day and scheduling may be delayed by up to 59 minutes; opportunistic cleanup on checkout keeps stock accurate when new orders arrive. Pro supports per-minute cron schedules if desired. Local build commands do not deploy the project.
 
 ## Existing data
 
-`bella.sql` is the source MySQL schema; `backend/src/main/resources/db/migration/V1__initial_schema.sql` is the new PostgreSQL schema. No rows or uploaded files are copied. Back up the source and target, export/import records with an explicit mapping (including enum/check values, identity sequences, and timestamp timezone), copy uploads to private persistent storage, validate counts and relationships, then switch traffic only after a separate reviewed cutover. Do not point this migration at production without that process.
+`bella.sql` is the source MySQL schema and `bella-postgresql-schema.sql` is the target PostgreSQL schema. No database rows are copied by this source migration. Back up the source and target, migrate data with an explicit mapping (including enum/check values, identity sequences, and timestamps), copy existing uploads to private Supabase Storage, verify counts and references, then switch traffic only after a separate reviewed cutover. Do not point migration scripts at production without a verified backup and cutover plan.
+
+The rebuild removes tracked PHP/Spring source, obsolete deployment files, and generated test artifacts. SQL schemas remain available. Existing untracked uploads under `backend/uploads/` are kept out of Git and Vercel; migrate them to the private storage bucket separately if they are still needed.
 
 ## Known follow-up work
 
-- Replace local receipt/photo disk storage with a private durable object store before hosting the API on ephemeral infrastructure.
-- Integration tests use disposable PostgreSQL through Testcontainers; Docker must be available to execute them.
-- Configure production CORS and cookie settings for the actual Vercel/API domains before launch.
+- End-to-end database lifecycle checks need a disposable PostgreSQL database; API unit tests do not modify configured databases.
+- Configure Vercel environment variables and apply the schema before trying live checkout or admin workflows.
 - Product admin editing/deactivation and login rate limiting remain follow-up work.

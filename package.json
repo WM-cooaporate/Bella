@@ -3,21 +3,24 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "vite build --config frontend/vite.config.js",
-    "dev": "vite --config frontend/vite.config.js --host 0.0.0.0",
-    "start": "vercel dev",
-    "test": "node --test"
+    "build": "vite build --config frontend/vite.config.js --configLoader runner",
+    "dev": "vite --config frontend/vite.config.js --configLoader runner --host 0.0.0.0",
+    "start": "node api/server.js",
+    "dev:api": "node --watch api/server.js",
+    "test": "node --test",
+    "admin:create": "node scripts/create-admin.js"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "react": "latest",
-    "react-dom": "latest",
     "@supabase/supabase-js": "^2.57.0",
+    "@vitejs/plugin-react": "latest",
     "bcryptjs": "^3.0.2",
     "cookie": "^1.0.2",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
     "pg": "^8.16.3",
-    "@vercel/node": "^5.3.21"
+    "react": "latest",
+    "react-dom": "latest",
+    "vite": "latest"
   },
-  "devDependencies": {}
+  "engines": { "node": ">=20" }
 }

@@ -3,6 +3,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "functions": { "api/**/*.js": { "maxDuration": 30 } },
-  "rewrites": [{ "source": "/api/(.*)", "destination": "/api/index?path=$1" }]
+  "functions": { "api/index.js": { "maxDuration": 30 } },
+  "rewrites": [
+    { "source": "/api/health", "destination": "/api/index?path=health" },
+    { "source": "/api/(.*)", "destination": "/api/index?path=$1" }
+  ],
+  "crons": [{ "path": "/api/cron/expire-reservations", "schedule": "0 0 * * *" }]
 }
