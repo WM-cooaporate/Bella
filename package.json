@@ -4,13 +4,19 @@
   "private": true,
   "scripts": {
     "build": "vite build --config frontend/vite.config.js",
-    "dev": "vite --config frontend/vite.config.js --host 0.0.0.0"
+    "dev": "vite --config frontend/vite.config.js --host 0.0.0.0",
+    "start": "vercel dev"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
     "vite": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "@supabase/supabase-js": "^2.57.0",
+    "bcryptjs": "^3.0.2",
+    "cookie": "^1.0.2",
+    "pg": "^8.16.3",
+    "@vercel/node": "^5.3.21"
   },
   "devDependencies": {}
 }

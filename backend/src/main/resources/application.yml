@@ -9,9 +9,9 @@ server:
         same-site: ${COOKIE_SAME_SITE:none}
 spring:
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/bella}
-    username: ${DB_USER:bella}
-    password: ${DB_PASSWORD:}
+    url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/bella}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USER:bella}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:}}
   flyway:
     enabled: ${FLYWAY_ENABLED:false}
   servlet:
@@ -20,6 +20,11 @@ spring:
       max-request-size: 6MB
 bella:
   storage-path: ${BELLA_STORAGE_PATH:./bella-data}
+  storage:
+    provider: ${BELLA_STORAGE_PROVIDER:local}
+    supabase-url: ${SUPABASE_URL:}
+    supabase-service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
+    supabase-bucket: ${SUPABASE_STORAGE_BUCKET:bella-private}
   admin:
     username: ${BELLA_ADMIN_USERNAME:}
     password: ${BELLA_ADMIN_PASSWORD:}

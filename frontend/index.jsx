@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client';
 import './css/style.css';
 
 const api = async (action, options = {}) => {
-  const response = await fetch(`/api/${action}`, { credentials: 'include', ...options });
+  const base = import.meta.env.VITE_BELLA_API_ORIGIN || '';
+  const response = await fetch(`${base}/api/${action}`, { credentials: 'include', ...options });
   const data = response.headers.get('content-type')?.includes('json') ? await response.json() : {};
   if (!response.ok) throw new Error(data.message || 'Request failed');
   return data;
