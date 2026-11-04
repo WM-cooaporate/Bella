@@ -143,3 +143,22 @@ test('product image URLs retain the private bucket object path', async () => {
   assert.match(source, /split\('\/'\)\.map\(encodeURIComponent\)/);
   assert.match(source, /src=\{heroImage\}/);
 });
+
+test('storefront has no public admin navigation and the preview checkout is clearly simulated', async () => {
+  const fs = require('node:fs/promises');
+  const source = await fs.readFile(require.resolve('../frontend/index.jsx'), 'utf8');
+  assert.doesNotMatch(source, /href="\/admin\.html"/);
+  assert.match(source, /const preview = import\.meta\.env\.DEV/);
+  assert.match(source, /no money or orders are created/);
+  assert.match(source, /api\('orders'/);
+  assert.match(source, /api\('payments'/);
+});
+
+test('production storefront requires a configured public payment destination', async () => {
+  const fs = require('node:fs/promises');
+  const source = await fs.readFile(require.resolve('../frontend/index.jsx'), 'utf8');
+  assert.match(source, /VITE_INSTAPAY_HANDLE/);
+  assert.match(source, /VITE_ORANGE_CASH_NUMBER/);
+  assert.match(source, /!paymentReady/);
+  assert.match(source, /form\.set\('payment_method', paymentMethod\)/);
+});
